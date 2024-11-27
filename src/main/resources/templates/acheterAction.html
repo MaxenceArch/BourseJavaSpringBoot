@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Acheter des Actions</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #e2e8f0;
+            --green: #22c55e;
+            --border: #2d3748;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: #94a3b8;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-back {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>Acheter des Actions</h1>
+
+        <div class="action-info">
+            <i class="fas fa-chart-line action-icon floating-icon"></i>
+            <div>
+                <div style="font-size: 1.25rem; font-weight: 600;" th:text="${action.nomAction}"></div>
+                <div style="color: #94a3b8;" th:text="'ID: ' + ${action.id}"></div>
+            </div>
+        </div>
+
+        <form th:action="@{'/acheter/' + ${trader.id} + '/' + ${action.id}}" method="post">
+            <div class="form-group">
+                <label>Quantité</label>
+                <div class="input-group">
+                    <i class="fas fa-cubes input-icon"></i>
+                    <input type="number" name="quantite" required min="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Prix d'achat</label>
+                <div class="input-group">
+                    <i class="fas fa-dollar-sign input-icon"></i>
+                    <input type="number" step="0.01" name="montantAchat" required min="0">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i>
+                Confirmer l'achat
+            </button>
+        </form>
+
+        <a th:href="@{'/acheter/' + ${trader.id}}" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Retour
+        </a>
+    </div>
+</div>
+</body>
+</html>

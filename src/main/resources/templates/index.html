@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plateforme de Trading</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #4f46e5;
+            --success: #22c55e;
+            --background: #0f172a;
+            --card: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 4s ease-in-out infinite;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 0.5rem rgba(99, 102, 241, 0.2)); }
+            50% { filter: drop-shadow(0 0 1rem rgba(99, 102, 241, 0.4)); }
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1));
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .stat-card:hover::after {
+            transform: translateX(0);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .chart-container {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 3rem;
+            height: 300px;
+        }
+
+        .traders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .trader-card {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trader-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .trader-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .trader-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .trader-info {
+            position: relative;
+            z-index: 2;
+        }
+
+        .trader-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .trader-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .trader-action:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .trader-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .trader-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+
+            .traders-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Trading Platform</h1>
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            Live Trading
+        </div>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-value" id="tradersCount">0</div>
+            <div class="stat-label">Traders Actifs</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-chart-line stat-icon"></i>
+            <div class="stat-value" id="transactionsCount">0</div>
+            <div class="stat-label">Transactions</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-coins stat-icon"></i>
+            <div class="stat-value" id="volumeTotal">$0</div>
+            <div class="stat-label">Volume Total</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="tradingChart"></canvas>
+    </div>
+
+    <div class="traders-grid" id="tradersGrid">
+        <!-- Traders will be inserted here by JavaScript -->
+    </div>
+</div>
+
+<script>
+    // Simulate real-time data updates
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+
+            if (element.id === 'volumeTotal') {
+                element.textContent = '$' + value.toLocaleString();
+            } else {
+                element.textContent = value.toLocaleString();
+            }
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Initialize counter animations
+    animateValue(document.getElementById('tradersCount'), 0, 5, 2000);
+    animateValue(document.getElementById('transactionsCount'), 0, 24500, 2000);
+    animateValue(document.getElementById('volumeTotal'), 0, 1200000, 2000);
+
+    // Sample trading data
+    const tradingData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Volume de Trading',
+            data: [30, 45, 35, 50, 40, 60],
+            borderColor: '#6366f1',
+            tension: 0.4,
+            fill: true,
+            backgroundColor: 'rgba(99, 102, 241, 0.1)'
+        }]
+    };
+
+    // Initialize trading chart
+    const ctx = document.getElementById('tradingChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: tradingData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#94a3b8'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#94a3b8'
+                    }
+                }
+            }
+        }
+    });
+
+    // Sample traders data
+    const traders = [
+        { id: 1, name: 'Alice Martin', performance: '+15.2%', status: 'Actif' },
+        { id: 2, name: 'Thomas Durant', performance: '+12.5%', status: 'Actif' },
+        { id: 3, name: 'Sophie Bernard', performance: '+18.7%', status: 'Actif' },
+        { id: 4, name: 'Lucas Petit', performance: '+10.1%', status: 'Actif' },
+        { id: 5, name: 'Emma Dubois', performance: '+14.3%', status: 'Actif' }
+    ];
+
+    // Populate traders grid
+    const tradersGrid = document.getElementById('tradersGrid');
+    traders.forEach(trader => {
+        const traderCard = document.createElement('div');
+        traderCard.className = 'trader-card';
+        traderCard.innerHTML = `
+            <div class="trader-info">
+                <div class="trader-name">${trader.name}</div>
+                <a href="/actions/${trader.id}" class="trader-action">
+                    <i class="fas fa-chart-bar"></i>
+                    Voir le Portfolio
+                </a>
+                <div class="trader-stats">
+                    <div class="trader-stat">
+                        <i class="fas fa-arrow-trend-up"></i>
+                        <span>${trader.performance}</span>
+                    </div>
+                    <div class="trader-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>${trader.status}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        tradersGrid.appendChild(traderCard);
+    });
+
+    // Simulate real-time updates
+    setInterval(() => {
+        const chart = Chart.getChart(ctx);
+        const newData = chart.data.datasets[0].data.map(val =>
+            val * (1 + (Math.random() * 0.1 - 0.05))
+        );
+        chart.data.datasets[0].data = newData;
+        chart.update('none');
+    }, 5000);
+</script>
+</body>
+</html>
